@@ -1,9 +1,16 @@
 import * as pdfjsLib from "pdfjs-dist";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
 import type { DocumentPreview, ParseWarning, Rect } from "../parsers/types";
 
 /** Cap the backing store so a hi-dpi screen cannot allocate an enormous canvas. */
 const MAX_CANVAS_SCALE = 3;
+
+/**
+ * pdf.js refuses to render a page onto a canvas that is already rendering, and
+ * a resize can easily land mid-draw. Tracking the task per canvas lets a new
+ * draw cancel the one it supersedes.
+ */
+const inFlight = new WeakMap<HTMLCanvasElement, RenderTask>();
 
 export interface DocumentView {
   /** Draw a parsed document's original layout with its warning regions. */
@@ -150,6 +157,10 @@ async function drawPage(
   const width = canvas.clientWidth;
   if (width === 0) return;
 
+  // A superseded draw is worthless; cancel it rather than let pdf.js reject
+  // the second render outright.
+  inFlight.get(canvas)?.cancel();
+
   const page = await doc.getPage(pageNumber);
   const unscaled = page.getViewport({ scale: 1 });
   const dpr = Math.min(window.devicePixelRatio || 1, MAX_CANVAS_SCALE);
@@ -160,7 +171,18 @@ async function drawPage(
 
   const context = canvas.getContext("2d");
   if (!context) return;
-  await page.render({ canvasContext: context, viewport }).promise;
+
+  const task = page.render({ canvasContext: context, viewport });
+  inFlight.set(canvas, task);
+
+  try {
+    await task.promise;
+  } catch (error) {
+    // Cancellation is the expected outcome of a resize, not a failure.
+    if ((error as Error)?.name !== "RenderingCancelledException") throw error;
+  } finally {
+    if (inFlight.get(canvas) === task) inFlight.delete(canvas);
+  }
 }
 
 /**
