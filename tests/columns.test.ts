@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectColumns, isSpanningRun } from "../src/lib/columns";
+import { detectColumns } from "../src/lib/columns";
 import type { PageContent, TextRun } from "../src/parsers/types";
 
 const PAGE_W = 612;
@@ -28,21 +28,6 @@ const twoColumnRuns = (rows = 6): TextRun[] =>
     run(60, 120 + i * 20, 160, `left-${i}`),
     run(340, 120 + i * 20, 210, `right-${i}`),
   ]).flat();
-
-describe("isSpanningRun", () => {
-  it("treats a run covering most of the page width as spanning", () => {
-    expect(isSpanningRun(run(50, 40, 500), PAGE_W)).toBe(true);
-  });
-
-  it("treats a column-width run as not spanning", () => {
-    expect(isSpanningRun(run(60, 120, 160), PAGE_W)).toBe(false);
-  });
-
-  it("uses the page width, not an absolute size", () => {
-    expect(isSpanningRun(run(0, 0, 300), 400)).toBe(true);
-    expect(isSpanningRun(run(0, 0, 300), 1200)).toBe(false);
-  });
-});
 
 describe("detectColumns", () => {
   it("returns nothing for an empty page", () => {
@@ -75,6 +60,31 @@ describe("detectColumns", () => {
   it("still finds columns under a full-width header that crosses the gutter", () => {
     const runs = [run(60, 60, 500, "CHARLIE KRUG — SENIOR ENGINEER"), ...twoColumnRuns()];
     expect(detectColumns(page(runs))).toHaveLength(2);
+  });
+
+  it("still finds columns under a header too narrow to span the page", () => {
+    // A 16pt name banner is only ~250pt wide, but it crosses the gutter all
+    // the same — the crossing is what matters, not the width.
+    const runs = [run(72, 60, 250, "CHARLIE KRUG"), ...twoColumnRuns()];
+    expect(detectColumns(page(runs))).toHaveLength(2);
+  });
+
+  it("excludes a gutter-crossing header from both columns", () => {
+    const header = run(72, 60, 250, "CHARLIE KRUG");
+    const columns = detectColumns(page([header, ...twoColumnRuns()]));
+
+    const assigned = columns.flatMap((c) => c.runs).map((r) => r.str);
+    expect(assigned).not.toContain("CHARLIE KRUG");
+  });
+
+  it("does not treat a gutter as open when most lines cross it", () => {
+    // Prose with a wide justified gap on a couple of lines is not a column.
+    const runs = [
+      ...Array.from({ length: 8 }, (_, i) => run(72, 100 + i * 18, 460)),
+      run(72, 280, 100),
+      run(340, 280, 100),
+    ];
+    expect(detectColumns(page(runs))).toEqual([]);
   });
 
   it("ignores a narrow inter-word gap", () => {

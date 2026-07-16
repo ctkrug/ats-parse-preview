@@ -59,9 +59,9 @@ describe("nativeOrder", () => {
 
 describe("columnAwareOrder", () => {
   it("reads each column in turn rather than row by row", () => {
-    const p = rowMajorPage(3);
+    const p = rowMajorPage(4);
     const ordered = columnAwareOrder(p, detectColumns(p));
-    expect(strings(ordered)).toEqual(["L0", "L1", "L2", "R0", "R1", "R2"]);
+    expect(strings(ordered)).toEqual(["L0", "L1", "L2", "L3", "R0", "R1", "R2", "R3"]);
   });
 
   it("places a full-width header before the columns", () => {
@@ -152,10 +152,10 @@ describe("runsToText", () => {
   });
 
   it("shows the scramble: row-major columns interleave in the text stream", () => {
-    const p = rowMajorPage(3);
-    expect(runsToText(nativeOrder(p))).toBe("L0 R0\nL1 R1\nL2 R2");
+    const p = rowMajorPage(4);
+    expect(runsToText(nativeOrder(p))).toBe("L0 R0\nL1 R1\nL2 R2\nL3 R3");
     expect(runsToText(columnAwareOrder(p, detectColumns(p)))).toBe(
-      "L0\nL1\nL2\nR0\nR1\nR2",
+      "L0\nL1\nL2\nL3\nR0\nR1\nR2\nR3",
     );
   });
 });
