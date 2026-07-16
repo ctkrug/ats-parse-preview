@@ -33,6 +33,15 @@
   box-sizing: border-box;
 }
 
+/*
+ * Component rules below set display on .drop/.workspace/.switcher, which ties
+ * with the UA sheet's [hidden] at equal specificity and wins on order — so a
+ * hidden panel would still render. The app's whole state model rides on this.
+ */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
