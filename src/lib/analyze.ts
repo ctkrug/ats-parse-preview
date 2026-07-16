@@ -29,8 +29,18 @@ export function analyzePage(page: PageContent): ParseWarning[] {
     return warnings;
   }
 
-  const columns = detectColumns(page);
-  const interleaving = measureInterleaving(page, columns);
+  // Tables claim their runs first: a table's cell columns sit in the same
+  // whitespace-gutter shape as page columns, and reporting a table twice —
+  // once as a table, once as scrambled columns — would be noise.
+  const tables = detectTables(page);
+  const inTable = new Set(tables.flatMap((t) => t.rows.flat()).map((run) => run.order));
+  const body: PageContent = {
+    ...page,
+    runs: page.runs.filter((run) => !inTable.has(run.order)),
+  };
+
+  const columns = detectColumns(body);
+  const interleaving = measureInterleaving(body, columns);
   if (interleaving.isInterleaved) {
     warnings.push({
       id: `page-${page.pageNumber}-multi-column`,
@@ -45,7 +55,7 @@ export function analyzePage(page: PageContent): ParseWarning[] {
     });
   }
 
-  for (const [index, region] of detectTables(page).entries()) {
+  for (const [index, region] of tables.entries()) {
     const scrambled = isTableOutOfOrder(region);
     warnings.push({
       id: `page-${page.pageNumber}-table-${index}`,
