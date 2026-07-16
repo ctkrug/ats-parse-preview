@@ -1,6 +1,5 @@
 import type { PageContent, TextRun } from "../parsers/types";
 import type { Column } from "./columns";
-import { isSpanningRun } from "./columns";
 import { groupIntoLines } from "./lines";
 
 /**
@@ -24,7 +23,7 @@ export function columnAwareOrder(page: PageContent, columns: readonly Column[]):
   const columnTop = Math.min(...columns.map((c) => c.bounds.y));
   const columnBottom = Math.max(...columns.map((c) => c.bounds.y + c.bounds.h));
 
-  const spanning = page.runs.filter((run) => isSpanningRun(run, page.width));
+  const spanning = page.runs.filter((run) => columnOf(run, columns) === -1);
   const above = spanning.filter((run) => run.y < columnTop);
   const below = spanning.filter((run) => run.y >= columnBottom);
   const between = spanning.filter((run) => !above.includes(run) && !below.includes(run));
@@ -42,10 +41,14 @@ function byPosition(runs: readonly TextRun[]): TextRun[] {
   return groupIntoLines(runs).flat();
 }
 
-/** Index of the column containing a run's horizontal center, or -1 if none. */
+/**
+ * Index of the column that fully contains a run, or -1 for a run that spans
+ * across the gutter — a header, a section rule, a footer.
+ */
 export function columnOf(run: TextRun, columns: readonly Column[]): number {
-  const center = run.x + run.w / 2;
-  return columns.findIndex((column) => center >= column.x0 && center <= column.x1);
+  return columns.findIndex(
+    (column) => run.x >= column.x0 && run.x + run.w <= column.x1,
+  );
 }
 
 export interface Interleaving {
