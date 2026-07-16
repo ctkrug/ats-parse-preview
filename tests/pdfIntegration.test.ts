@@ -46,6 +46,25 @@ const twoColumnRowMajor = (): FixtureRun[] => {
   return runs;
 };
 
+/**
+ * A three-column table emitted column-major: every cell of column one, then
+ * column two, then column three. Each row's values arrive detached from their
+ * label — the table scramble.
+ */
+const tableColumnMajor = (): FixtureRun[] => {
+  const rows = ["Senior Engineer", "Platform Lead", "Backend Engineer"];
+  const dates = ["2022 - 2024", "2020 - 2022", "2018 - 2020"];
+  const places = ["Berlin", "Munich", "Hamburg"];
+
+  const runs: FixtureRun[] = [];
+  for (const [column, cells] of [rows, dates, places].entries()) {
+    cells.forEach((text, row) => {
+      runs.push({ x: 72 + column * 170, y: fromTop(140 + row * 24), text });
+    });
+  }
+  return runs;
+};
+
 describe("extractFromPdf", () => {
   it("extracts text and page geometry from a real PDF", async () => {
     const parsed = await extractFromPdf(asFile(buildPdf(singleColumn())));
@@ -112,6 +131,29 @@ describe("extractFromPdf", () => {
     expect(left.x).toBeGreaterThanOrEqual(0);
     expect(right.x + right.w).toBeLessThanOrEqual(PAGE_WIDTH);
     expect(left.x + left.w).toBeLessThan(right.x);
+  });
+
+  it("warns that a column-major table's cells arrive out of order", async () => {
+    const parsed = await extractFromPdf(asFile(buildPdf(tableColumnMajor())));
+    const table = parsed.warnings.find((w) => w.kind === "table");
+
+    expect(table).toBeDefined();
+    expect(table!.title).toMatch(/out of order/i);
+    expect(table!.regions).toHaveLength(1);
+  });
+
+  it("shows the table's cells concatenated out of visual row order", async () => {
+    const parsed = await extractFromPdf(asFile(buildPdf(tableColumnMajor())));
+
+    // Read down the first column, so a title is followed by the next title
+    // rather than by its own dates.
+    expect(parsed.text).toContain("Senior Engineer\nPlatform Lead");
+    expect(parsed.text).not.toContain("Senior Engineer 2022 - 2024");
+  });
+
+  it("does not report a table as scrambled columns as well", async () => {
+    const parsed = await extractFromPdf(asFile(buildPdf(tableColumnMajor())));
+    expect(parsed.warnings.map((w) => w.kind)).toEqual(["table"]);
   });
 
   it("warns when a page has no text layer at all", async () => {
