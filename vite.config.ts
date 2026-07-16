@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 
 // Relative base so the built site works when hosted under a subpath
@@ -6,5 +7,8 @@ export default defineConfig({
   base: "./",
   build: {
     outDir: "dist",
+  },
+  test: {
+    setupFiles: ["./tests/setup.ts"],
   },
 });
