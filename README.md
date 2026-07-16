@@ -28,14 +28,50 @@ ATS Parse Preview does the opposite:
 - **Show the work.** The diff view *is* the product — you see precisely what an ATS ingests,
   not a black-box verdict.
 
-## Planned features
+## How it works
 
-- Drag-and-drop upload for PDF and DOCX resumes.
-- Side-by-side view: original rendered layout vs. raw extracted text stream.
-- Highlighted regions on the original document flagging multi-column reflow issues, table
-  cell reordering, floating text boxes, and image-only text.
-- Plain-language explanations for every warning — what it means and why an ATS trips on it.
-- Copy-to-clipboard for the exact extracted text.
+An ATS reads a resume as one linear stream of text, in the order the file's content stream
+emits it — not the order your eye reads the page. When a two-column layout is emitted row by
+row, the parser reads *across* the columns, and your job titles land beside the neighbouring
+column's dates.
+
+So the tool extracts that exact stream, keeps every word's position on the page, and compares
+the two:
+
+- **Columns read across, not down.** It counts how often the parse order hops between your
+  columns. Reading two columns properly takes exactly one switch; a scrambling file switches on
+  nearly every line. Both columns get highlighted when that happens.
+- **Tables that scramble their rows.** Aligned cell grids are detected, and cells emitted down
+  the columns instead of across the rows are called out.
+- **Pages with no text layer.** An exported-as-image resume looks perfect and parses to
+  nothing. You get told, plainly.
+
+It only warns when the parse actually breaks. Columns that a parser happens to read in order
+raise nothing — the value here is honesty, not a scary count.
+
+## Features
+
+- Drag-and-drop or pick a PDF or DOCX (10 MB cap, validated before parsing).
+- Split view: your rendered document beside the raw stream, warnings cross-linked to the
+  highlighted regions on your own layout.
+- Plain-language explanation of *why* each warning matters to a parser.
+- Copy the exact extracted text to the clipboard.
+- Designed empty, loading, error, and success states — a password-protected or damaged file
+  gets a sentence you can act on, never a blank screen.
+
+## Develop
+
+```bash
+npm install
+npm run dev        # dev server
+npm test           # vitest: pure logic + real-pdf.js integration
+npm run typecheck  # tsc --noEmit
+npm run build      # -> dist/ (app at the root, landing page in dist/site)
+npm run preview    # serve the build
+```
+
+The build is static and every path is relative, so `dist/` can be served from a subpath.
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) maps the modules and the data flow.
 
 ## Stack
 
@@ -47,8 +83,10 @@ ATS Parse Preview does the opposite:
 
 ## Status
 
-Early scaffold — see [`docs/VISION.md`](docs/VISION.md) and [`docs/BACKLOG.md`](docs/BACKLOG.md)
-for the plan.
+Working: PDF and DOCX parsing, column-scramble and table detection, the split view with
+highlighted regions, and the landing page. Text-box and image-only warnings for PDFs are still
+to come — see [`docs/BACKLOG.md`](docs/BACKLOG.md), with the rationale in
+[`docs/VISION.md`](docs/VISION.md).
 
 ## License
 
