@@ -12,10 +12,10 @@ if (!app) throw new Error("Missing #app root element");
 app.innerHTML = `
   <header class="masthead">
     <h1 class="wordmark">
-      <span class="wordmark__bracket">&#8968;</span>ATS<span class="wordmark__thin">parse</span><span class="wordmark__bracket">&#8971;</span>
+      <span class="wordmark__bracket">&#8968;</span>Read<span class="wordmark__thin">out</span><span class="wordmark__bracket">&#8971;</span>
     </h1>
     <p class="masthead__tag">
-      See the exact plain text a resume parser pulls out of your file — and where your
+      See the exact plain text a resume parser pulls out of your file, and where your
       layout scrambles it.
     </p>
     <div class="masthead__actions">
