@@ -140,10 +140,15 @@ app.innerHTML = `
     </div>
   </section>
 
-  <footer>
+  <footer class="footer">
     <p class="footnote">
-      Everything runs client-side with pdf.js and mammoth.js — open your network tab and
+      Everything runs in your browser with pdf.js and mammoth.js. Open your network tab and
       watch nothing leave.
+    </p>
+    <p class="footnote">
+      <a href="https://github.com/ctkrug/ats-parse-preview">Source on GitHub</a>
+      <span class="footnote__dot" aria-hidden="true">&middot;</span>
+      <a href="https://apps.charliekrug.com">More by Charlie Krug &rarr; apps.charliekrug.com</a>
     </p>
   </footer>
 `;

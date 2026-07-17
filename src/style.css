@@ -898,6 +898,16 @@ body {
   line-height: 1.6;
 }
 
+/* ---------- footer ---------- */
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--line);
+}
+
 .footnote {
   margin: 0;
   color: var(--text-muted);
@@ -905,8 +915,22 @@ body {
   text-align: center;
 }
 
+.footnote__dot {
+  margin: 0 6px;
+  color: var(--line);
+}
+
 .footnote a {
   color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--motion);
+}
+
+.footnote a:hover,
+.footnote a:focus-visible {
+  outline: none;
+  border-bottom-color: var(--accent);
 }
 
 /* ---------- responsive ---------- */
