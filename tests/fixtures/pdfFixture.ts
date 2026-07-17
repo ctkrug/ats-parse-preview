@@ -55,11 +55,34 @@ export function buildPdf(runs: readonly FixtureRun[]): Uint8Array<ArrayBuffer> {
   }
   pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
 
-  return new TextEncoder().encode(pdf);
+  return toWinAnsiBytes(pdf);
 }
 
 function escapeText(text: string): string {
   return text.replace(/([\\()])/g, "\\$1");
+}
+
+/**
+ * The page's font declares /Encoding /WinAnsiEncoding, which — for every
+ * character this fixture builder can produce — maps a codepoint to the byte
+ * of the same value (WinAnsi matches Latin-1 outside the 0x80-0x9F control
+ * range). Encoding the whole file as UTF-8 instead would split any character
+ * above U+007F into multiple bytes that WinAnsiEncoding decodes as garbage —
+ * exactly the mojibake a real hostile/accented resume must not produce.
+ */
+function toWinAnsiBytes(text: string): Uint8Array<ArrayBuffer> {
+  const bytes = new Uint8Array(text.length);
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code > 0xff) {
+      throw new Error(
+        `Fixture text contains U+${code.toString(16)}, outside WinAnsiEncoding's single-byte ` +
+          "range (0x00-0xFF) — this builder cannot represent it faithfully.",
+      );
+    }
+    bytes[i] = code;
+  }
+  return bytes as Uint8Array<ArrayBuffer>;
 }
 
 /** Convert a top-left y (how a layout is described) to PDF's bottom-left origin. */
