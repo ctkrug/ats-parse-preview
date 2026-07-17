@@ -130,8 +130,17 @@ body {
   font-size: 14px;
 }
 
-.masthead__privacy {
+.masthead__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
   margin: 0 0 0 auto;
+}
+
+.masthead__privacy {
+  margin: 0;
   padding: 6px var(--s-2);
   border: 1px solid rgba(74, 222, 128, 0.35);
   border-radius: var(--radius);

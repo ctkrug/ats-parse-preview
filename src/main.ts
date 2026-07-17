@@ -18,7 +18,12 @@ app.innerHTML = `
       See the exact plain text a resume parser pulls out of your file — and where your
       layout scrambles it.
     </p>
-    <p class="masthead__privacy">&#9679; Parsed in your browser. Never uploaded.</p>
+    <div class="masthead__actions">
+      <button class="button button--ghost masthead__reset" id="reset" type="button" hidden>
+        Check another file
+      </button>
+      <p class="masthead__privacy">&#9679; Parsed in your browser. Never uploaded.</p>
+    </div>
   </header>
 
   <div id="status" role="status" aria-live="polite"></div>
@@ -80,6 +85,7 @@ const dropSection = el("drop");
 const workspace = el("workspace");
 const switcher = el("switcher");
 const fileName = el("file-name");
+const resetButton = el<HTMLButtonElement>("reset");
 
 const documentView = createDocumentView(el("doc"), showInRail);
 const textStream = createTextStream(el("stream"), (text) => void copyText(text));
@@ -88,6 +94,13 @@ const warningsRail = createWarningsRail(el("rail"), (id) => documentView.focus(i
 createDropZone(dropSection, (file) => void handleFile(file));
 
 const fileGuard = createLatestGuard();
+
+// The drop zone is hidden once a result shows, so this is the only way back
+// to it without a full page reload.
+resetButton.addEventListener("click", () => {
+  fileGuard.start(); // invalidate any parse still in flight for the old file
+  showEmpty();
+});
 
 /** Clicking a highlighted region surfaces its explanation in the rail. */
 function showInRail(warningId: string): void {
@@ -145,6 +158,7 @@ async function showResult(parsed: ExtractedDocument): Promise<void> {
   dropSection.hidden = true;
   workspace.hidden = false;
   switcher.hidden = false;
+  resetButton.hidden = false;
 
   await documentView.show(parsed.preview, parsed.warnings);
 }
@@ -158,6 +172,7 @@ function showEmpty(): void {
   dropSection.hidden = false;
   workspace.hidden = true;
   switcher.hidden = true;
+  resetButton.hidden = true;
 }
 
 async function copyText(text: string): Promise<void> {
