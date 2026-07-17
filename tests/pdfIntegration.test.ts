@@ -167,4 +167,14 @@ describe("extractFromPdf", () => {
     const notAPdf = new File([new TextEncoder().encode("hello")], "resume.pdf");
     await expect(extractFromPdf(notAPdf)).rejects.toThrow();
   });
+
+  it("extracts accented characters without mangling them", async () => {
+    const runs: FixtureRun[] = [
+      { x: 72, y: fromTop(80), text: "José García-Núñez", size: 18 },
+      { x: 72, y: fromTop(110), text: "Café manager, Zürich" },
+    ];
+    const parsed = await extractFromPdf(asFile(buildPdf(runs)));
+
+    expect(parsed.text).toBe("José García-Núñez\nCafé manager, Zürich");
+  });
 });
