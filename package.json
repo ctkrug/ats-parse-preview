@@ -11,6 +11,7 @@
     "build:site": "cp -r site dist/site",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
+    "@vitest/coverage-v8": "^2.1.9",
     "jszip": "^3.10.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
