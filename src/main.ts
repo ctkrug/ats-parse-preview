@@ -100,6 +100,7 @@ const fileGuard = createLatestGuard();
 resetButton.addEventListener("click", () => {
   fileGuard.start(); // invalidate any parse still in flight for the old file
   showEmpty();
+  setStatus("", "none");
 });
 
 /** Clicking a highlighted region surfaces its explanation in the rail. */
