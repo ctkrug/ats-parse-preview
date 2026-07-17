@@ -7,8 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && npm run build:site",
-    "build:site": "cp -r site dist/site",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
