@@ -1,6 +1,6 @@
 {
   "name": "ats-parse-preview",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Readout: see what an ATS reads. No email. Parses your resume in the browser.",
   "type": "module",
   "license": "MIT",
