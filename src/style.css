@@ -788,6 +788,116 @@ body {
   box-shadow: var(--glow);
 }
 
+/* ---------- explainer + faq (below the tool) ---------- */
+
+.explainer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+
+.explainer__headline,
+.faq__heading {
+  margin: 0 0 var(--s-2);
+  font-family: var(--font-display);
+  font-size: clamp(19px, 1.9vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.faq__heading {
+  color: var(--text-muted);
+}
+
+.explainer__lead p {
+  margin: 0 0 var(--s-2);
+  max-width: 68ch;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* The payoff line earns the accent rule; the setup above it does not. */
+.explainer__kicker {
+  margin-bottom: 0 !important;
+  padding-left: var(--s-2);
+  border-left: 2px solid var(--accent);
+  color: var(--text) !important;
+}
+
+.faq__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.faq__item {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  transition: background var(--motion);
+}
+
+.faq__item[open] {
+  background: var(--surface-2);
+}
+
+.faq__q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: var(--s-1) var(--s-2);
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  /* Suppress the native disclosure triangle in favour of the themed marker. */
+  list-style: none;
+  transition: color var(--motion);
+}
+
+.faq__q::-webkit-details-marker {
+  display: none;
+}
+
+.faq__q::after {
+  content: "+";
+  flex: none;
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+  transition: transform var(--motion);
+}
+
+.faq__item[open] .faq__q::after {
+  transform: rotate(45deg);
+}
+
+.faq__q:hover {
+  color: var(--accent);
+}
+
+.faq__q:focus-visible {
+  outline: none;
+  border-radius: 2px;
+  box-shadow: var(--glow);
+}
+
+.faq__a {
+  margin: 0;
+  padding: 0 var(--s-2) var(--s-2);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .footnote {
   margin: 0;
   color: var(--text-muted);
@@ -808,6 +918,11 @@ body {
 
   .rail {
     grid-column: 1 / -1;
+  }
+
+  .explainer {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-3);
   }
 }
 

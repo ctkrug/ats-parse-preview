@@ -66,6 +66,80 @@ app.innerHTML = `
     <aside class="rail" id="rail" aria-label="Parse warnings"></aside>
   </section>
 
+  <section class="explainer" id="explainer">
+    <article class="explainer__lead">
+      <h2 class="explainer__headline">Why isn't my resume passing ATS?</h2>
+      <p>
+        Usually it is not your experience. It is your file. An applicant tracking system does
+        not look at a resume the way you do: it flattens the whole document into one stream of
+        text, reads that stream in whatever order the file emits it, and hands the result to a
+        keyword matcher. Your layout is gone before anyone scores you.
+      </p>
+      <p>
+        That is harmless for a plain single-column resume. It goes wrong when the template gets
+        clever. A two-column layout only survives if the file writes the left column out in full
+        before it starts the right one. Plenty of templates instead write line by line across
+        both, so the parser reads straight across the gutter and your job title lands next to
+        the other column's dates. Tables split labels from their values the same way. A resume
+        exported as an image parses to nothing at all.
+      </p>
+      <p class="explainer__kicker">
+        None of that is visible on the page, which is why silence after forty applications is so
+        hard to debug. Readout shows you the stream itself, then marks the places on your own
+        layout where it broke.
+      </p>
+    </article>
+
+    <div class="faq">
+      <h2 class="faq__heading">Questions</h2>
+      <div class="faq__list">
+        <details class="faq__item">
+          <summary class="faq__q">Is this an ATS resume checker with no email?</summary>
+          <p class="faq__a">
+            Yes. No email field, no account, no upsell at the end. Readout is a resume checker
+            without signup because there is nothing to sign up to: it is a static page, and the
+            parsing happens in JavaScript that is already running in your tab.
+          </p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Where does my resume get uploaded?</summary>
+          <p class="faq__a">
+            Nowhere. pdf.js and mammoth.js run in your browser, so the file never leaves your
+            machine. Open your network tab, drop a resume in, and watch: nothing fires. It also
+            keeps working with your wifi switched off, which is the quickest way to prove the
+            claim rather than trust it.
+          </p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Why is there no score out of 100?</summary>
+          <p class="faq__a">
+            Because it would be invented. Hundreds of ATS vendors each parse a little
+            differently, so a single number implies a precision nobody actually has. The
+            extracted text is checkable instead: read it and see for yourself whether your job
+            title survived.
+          </p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Are two-column resume templates safe?</summary>
+          <p class="faq__a">
+            Some are. The look is not the problem, the emission order is. Readout counts how
+            often the parse hops between your columns. One hop means the file writes each column
+            as a block and it reads correctly. A hop on nearly every line means it is
+            scrambling. Drop yours in and you will know which one you have.
+          </p>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">My resume looks fine. Is it worth checking?</summary>
+          <p class="faq__a">
+            That is the case most worth checking. A file that looks perfect and parses to word
+            salad is the exact failure this tool exists to catch, and the one you cannot spot by
+            looking at the page.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <footer>
     <p class="footnote">
       Everything runs client-side with pdf.js and mammoth.js — open your network tab and
@@ -82,6 +156,7 @@ const el = <T extends HTMLElement>(id: string): T => {
 
 const statusBar = el("status");
 const dropSection = el("drop");
+const explainer = el("explainer");
 const workspace = el("workspace");
 const switcher = el("switcher");
 const fileName = el("file-name");
@@ -156,7 +231,10 @@ async function showResult(parsed: ExtractedDocument): Promise<void> {
   textStream.show(parsed.text);
   warningsRail.show(parsed.warnings);
 
+  // The explainer is the empty state's supporting copy; once a real parse is on
+  // screen the rail explains each warning in context and it is just noise.
   dropSection.hidden = true;
+  explainer.hidden = true;
   workspace.hidden = false;
   switcher.hidden = false;
   resetButton.hidden = false;
@@ -171,6 +249,7 @@ function showEmpty(): void {
   fileName.textContent = "";
 
   dropSection.hidden = false;
+  explainer.hidden = false;
   workspace.hidden = true;
   switcher.hidden = true;
   resetButton.hidden = true;
