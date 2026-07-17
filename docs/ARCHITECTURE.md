@@ -33,13 +33,15 @@ src/
     fileValidation.ts   # type/size checks at the input boundary
     parseErrors.ts      # ParseError + failure -> actionable message
     textStats.ts        # word/char/line counts for the stats strip
+    latestRequest.ts    # token guard: a superseded async result must lose, not win
   ui/                   # DOM views; each owns one panel and takes a callback
     dropZone.ts         # drag-and-drop + file picker
     documentView.ts     # canvas render + highlight regions + scan sweep
     textStream.ts       # raw stream panel, counts, copy
     warningsRail.ts     # warning list with explanations
-tests/                  # vitest; mirrors src/lib plus a real-pdf.js integration suite
-  fixtures/pdfFixture.ts  # hand-written PDF builder (pins content-stream order)
+tests/                  # vitest; mirrors src/lib plus real-pdf.js/real-mammoth integration suites
+  fixtures/pdfFixture.ts   # hand-written PDF builder (pins content-stream order, WinAnsi bytes)
+  fixtures/docxFixture.ts  # hand-built DOCX (OOXML) package builder via JSZip
   setup.ts              # Promise.withResolvers polyfill for pdf.js under Node
 ```
 
@@ -78,21 +80,31 @@ File
   order raise nothing. The tool's value is honesty, not a scary count.
 - **`lib/` never imports the DOM or pdf.js.** That is what makes the detectors testable, and
   it is why the test suite is fast and real rather than mocked.
+- **The latest dropped file always wins, even if it resolves first.** `main.ts` tokenizes each
+  `handleFile` call through `lib/latestRequest.ts`; a superseded parse that happens to settle
+  after a newer one is discarded rather than overwriting the UI.
+- **Test fixtures must byte-encode exactly what the format under test expects.** The PDF
+  fixture's font declares `/Encoding /WinAnsiEncoding`, so its bytes are written as WinAnsi
+  (Latin-1), not UTF-8 — otherwise any accented character silently mangles on decode. Same
+  reasoning as the content-stream-order fixture: shortcuts in test infra hide the exact bugs the
+  tests exist to catch.
 
 ## Running it
 
 ```
-npm run dev        # vite dev server
-npm test           # vitest: pure logic + real-pdf.js integration
-npm run typecheck  # tsc --noEmit
-npm run build      # typecheck + vite build -> dist/ (relative paths, subpath-safe)
-npm run preview    # serve dist/
+npm run dev            # vite dev server
+npm test               # vitest: pure logic + real-pdf.js/real-mammoth integration
+npm run test:coverage  # vitest --coverage (line coverage on src/lib + src/parsers)
+npm run typecheck      # tsc --noEmit
+npm run build          # typecheck + vite build -> dist/ (relative paths, subpath-safe)
+npm run preview        # serve dist/
 ```
 
 ## Testing approach
 
 `tests/` mirrors `src/lib` one file per module, covering happy path and boundaries (empty,
-single, malformed, off-by-one). `tests/pdfIntegration.test.ts` runs the real pdf.js over
-fixture PDFs whose bytes are written by hand in `tests/fixtures/pdfFixture.ts` — a generic PDF
-library hides content-stream order, which is exactly the variable under test. That suite is
-what caught the width-based gutter bug the synthetic unit tests could not.
+single, malformed, off-by-one). `tests/pdfIntegration.test.ts` and `tests/docxIntegration.test.ts`
+run the real pdf.js/mammoth over fixture files built by hand in `tests/fixtures/` — a generic PDF
+or DOCX library hides exactly the structural detail under test (content-stream order, real
+table/image markup). That's what caught the width-based gutter bug and the WinAnsi mojibake bug
+the synthetic unit tests could not.
