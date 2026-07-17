@@ -2,7 +2,7 @@
 
 ## 1. Aesthetic direction
 
-**Blueprint/technical.** ATS Parse Preview reads like an annotated engineering schematic: your
+**Blueprint/technical.** Readout reads like an annotated engineering schematic: your
 resume rendered on a deep blueprint-navy sheet, cyan grid lines underneath, amber callouts
 marking exactly where the parse breaks. The tool is literally reverse-engineering a document —
 the visual language should say "diagnostic instrument," not "consumer SaaS card grid." This
@@ -53,7 +53,9 @@ A **scan-line sweep**: on successful parse, a thin cyan line animates once top-t
 the rendered document (900ms), leaving highlighted warning regions "revealed" in its wake like a
 schematic being scanned. This single animation sells the "X-ray into what the ATS sees" concept
 better than any copy could. The favicon is a monogram: a bracket pair `⌐¬` styled as crosshair
-corners around a small "A", in `--accent` on `--bg`, generated as an inline SVG data URI.
+corners around a small "R", in `--accent` on `--bg`, generated as an inline SVG data URI. The
+wordmark reuses those same crosshair brackets around the name, so the mark and the wordmark are
+one idea at two sizes.
 
 ## 5. Juice plan
 
