@@ -14,8 +14,12 @@ Everything runs in the browser; no file ever leaves it.
 ## Layout
 
 ```
+index.html              # the page shell: masthead, drop zone, explainer, FAQ, footer.
+                        #   Real markup, not injected, so it is in the crawled document and
+                        #   paints before the (pdf.js-heavy) bundle loads. It is the landing
+                        #   page and the app at once; there is no separate marketing page.
 src/
-  main.ts               # app shell markup + state wiring (empty / busy / error / result)
+  main.ts               # state wiring only (empty / busy / error / result); fills the shell
   style.css             # the whole blueprint theme; tokens mirror docs/DESIGN.md
   parsers/
     index.ts            # parseFile(): the one door in — validate, dispatch, normalize errors
@@ -80,6 +84,9 @@ File
   order raise nothing. The tool's value is honesty, not a scary count.
 - **`lib/` never imports the DOM or pdf.js.** That is what makes the detectors testable, and
   it is why the test suite is fast and real rather than mocked.
+- **The static half of the page is authored in `index.html`.** The copy that has to be indexed,
+  and the shell a first-time visitor stares at, must not depend on 885 kB of bundle executing
+  first. `main.ts` only touches the panels the shell leaves empty.
 - **The latest dropped file always wins, even if it resolves first.** `main.ts` tokenizes each
   `handleFile` call through `lib/latestRequest.ts`; a superseded parse that happens to settle
   after a newer one is discarded rather than overwriting the UI.
