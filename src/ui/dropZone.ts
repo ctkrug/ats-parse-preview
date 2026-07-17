@@ -5,10 +5,7 @@
  * Drag events fire per child element, so the highlight is refcounted rather
  * than toggled — otherwise dragging over the inner text clears the state.
  */
-export function createDropZone(
-  root: HTMLElement,
-  onFile: (file: File) => void,
-): { destroy(): void } {
+export function createDropZone(root: HTMLElement, onFile: (file: File) => void): void {
   let depth = 0;
 
   const setDragging = (dragging: boolean) => {
@@ -23,50 +20,34 @@ export function createDropZone(
     input.value = "";
   });
 
-  const onDragEnter = (event: DragEvent) => {
+  root.addEventListener("dragenter", (event) => {
     event.preventDefault();
     depth++;
     setDragging(true);
-  };
+  });
 
-  const onDragOver = (event: DragEvent) => {
+  root.addEventListener("dragover", (event) => {
     event.preventDefault();
     if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
-  };
+  });
 
-  const onDragLeave = (event: DragEvent) => {
+  root.addEventListener("dragleave", (event) => {
     event.preventDefault();
     depth = Math.max(0, depth - 1);
     if (depth === 0) setDragging(false);
-  };
+  });
 
-  const onDrop = (event: DragEvent) => {
+  root.addEventListener("drop", (event) => {
     event.preventDefault();
     depth = 0;
     setDragging(false);
 
     const file = event.dataTransfer?.files?.[0];
     if (file) onFile(file);
-  };
-
-  root.addEventListener("dragenter", onDragEnter);
-  root.addEventListener("dragover", onDragOver);
-  root.addEventListener("dragleave", onDragLeave);
-  root.addEventListener("drop", onDrop);
+  });
 
   // A file dropped outside the zone would otherwise navigate away from the app.
   const blockNavigation = (event: DragEvent) => event.preventDefault();
   window.addEventListener("dragover", blockNavigation);
   window.addEventListener("drop", blockNavigation);
-
-  return {
-    destroy() {
-      root.removeEventListener("dragenter", onDragEnter);
-      root.removeEventListener("dragover", onDragOver);
-      root.removeEventListener("dragleave", onDragLeave);
-      root.removeEventListener("drop", onDrop);
-      window.removeEventListener("dragover", blockNavigation);
-      window.removeEventListener("drop", blockNavigation);
-    },
-  };
 }

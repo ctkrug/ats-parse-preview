@@ -18,7 +18,6 @@ export interface DocumentView {
   /** Pulse a warning's regions and scroll the first into view. */
   focus(warningId: string): void;
   clear(): void;
-  destroy(): void;
 }
 
 /**
@@ -84,12 +83,6 @@ export function createDocumentView(
     },
 
     clear() {
-      void clear();
-    },
-
-    destroy() {
-      observer?.disconnect();
-      window.clearTimeout(resizeTimer);
       void clear();
     },
   };
