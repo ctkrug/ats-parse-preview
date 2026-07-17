@@ -78,10 +78,10 @@ demo. It ships before anything else.
   - Verified by driving a real browser: zero requests of any kind fire during a parse.
 
 - [x] **Landing/marketing site matches the app's design system**
-  - `site/` is a static page built from the same tokens in `docs/DESIGN.md` (same fonts,
-    palette, and wordmark) so product and marketing page read as one brand.
-  - Links to the live app; builds to a single self-contained directory with relative asset
-    paths.
+  - Closed by deleting the separate `site/` page instead: the app is the landing page. Its
+    empty state carries the wordmark, the pitch, the explainer, and the source link, so product
+    and marketing cannot drift apart or read as two brands.
+  - `npm run build` emits `dist/`, one self-contained directory with relative asset paths.
 
 - [x] **Mobile responsive layout end-to-end**
   - Full upload-to-warnings flow works at 390px width with no horizontal scroll and touch
