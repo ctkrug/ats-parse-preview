@@ -1,3 +1,4 @@
+import { createLatestGuard } from "./lib/latestRequest";
 import { ParseError, parseFile } from "./parsers";
 import type { ExtractedDocument } from "./parsers/types";
 import { createDocumentView } from "./ui/documentView";
@@ -86,6 +87,8 @@ const warningsRail = createWarningsRail(el("rail"), (id) => documentView.focus(i
 
 createDropZone(dropSection, (file) => void handleFile(file));
 
+const fileGuard = createLatestGuard();
+
 /** Clicking a highlighted region surfaces its explanation in the rail. */
 function showInRail(warningId: string): void {
   const button = document.querySelector<HTMLElement>(
@@ -113,13 +116,17 @@ function setStatus(message: string, kind: "error" | "busy" | "none"): void {
 }
 
 async function handleFile(file: File): Promise<void> {
+  const token = fileGuard.start();
   setStatus(`Parsing ${file.name}…`, "busy");
 
   try {
     const parsed = await parseFile(file);
+    if (!fileGuard.isCurrent(token)) return;
     await showResult(parsed);
+    if (!fileGuard.isCurrent(token)) return;
     setStatus("", "none");
   } catch (error) {
+    if (!fileGuard.isCurrent(token)) return;
     showEmpty();
     setStatus(
       error instanceof ParseError
