@@ -1,7 +1,7 @@
 {
   "name": "ats-parse-preview",
   "version": "0.1.0",
-  "description": "See exactly what an ATS parser extracts from your resume — 100% client-side.",
+  "description": "Readout: see what an ATS reads. No email. Parses your resume in the browser.",
   "type": "module",
   "license": "MIT",
   "private": true,
